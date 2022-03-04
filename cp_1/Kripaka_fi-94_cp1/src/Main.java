@@ -1,20 +1,5 @@
-// * почитити файл від ком
-// lowercase letters
-// ъ = ь
-// ё = е
-// "   " = " "
-// всі символи окрім тесктових -- видалити
-// і зробити новий чистий файл
-//
-// * підрахувати частоти букв
-// і біграм
-// * підрахувати H1, H2 за озн
-//
-// * оцінити значення у рожевій програмці
-// * оцінити надлишковість російської мови в різних моделях джерела
-
-
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class Main {
@@ -26,6 +11,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            // ъ = ь, ё = е, "   " = " "
+            //put new text into text.txt, uncomment "filterText()", and run
 //            filterText();
             HashMap<String, Integer> frequencyTableWithGap = makeFrequencyDiagram(fileWithGaps.getCanonicalPath(), alphabetWithGap);
             HashMap<String, Integer> frequencyTableWithoutGap = makeFrequencyDiagram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap);
@@ -34,8 +21,8 @@ public class Main {
             HashMap<String, Integer> bigramWithoutGaps = makeBigram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap);
 
 
-            System.out.println(frequencyTableWithGap + "\n" + frequencyTableWithoutGap + "\n" + bigramWithGap + "\n" +
-                    bigramWithoutGaps);
+//            System.out.println(frequencyTableWithGap + "\n" + frequencyTableWithoutGap + "\n" + bigramWithGap + "\n" +
+//                    bigramWithoutGaps);
 
             HashMap<String, Double> probabilityTableWithGap = makeProbabilityTable(frequencyTableWithGap);
             HashMap<String, Double> probabilityTableWithoutGap = makeProbabilityTable(frequencyTableWithoutGap);
@@ -43,14 +30,15 @@ public class Main {
             HashMap<String, Double> bigramProbabilityTableWithGap = makeProbabilityTable(bigramWithGap);
             HashMap<String, Double> bigramProbabilityTableWithoutGaps = makeProbabilityTable(bigramWithoutGaps);
 
-            System.out.println(probabilityTableWithGap + "\n" + probabilityTableWithoutGap + "\n" +
-                    bigramProbabilityTableWithGap + "\n" + bigramProbabilityTableWithoutGaps);
+//            System.out.println(probabilityTableWithGap + "\n" + probabilityTableWithoutGap + "\n" +
+//                    bigramProbabilityTableWithGap + "\n" + bigramProbabilityTableWithoutGaps);
 
-            System.out.println("One symbol with gap: " + calculateEntropy(probabilityTableWithGap) + "\n" +
-            "One symbol without gaps: " + calculateEntropy(probabilityTableWithoutGap) + "\n" +
-                    "Bigram with gaps: " + calculateEntropy(bigramProbabilityTableWithGap)/2 +"\n" +
-                    "Bigram without gaps: " + calculateEntropy(bigramProbabilityTableWithoutGaps)/2);
+            System.out.println("Entropy for:" + "\n" + "One symbol with gap (H1): " + calculateEntropy(probabilityTableWithGap) + "\n" +
+            "One symbol without gaps (H1): " + calculateEntropy(probabilityTableWithoutGap) + "\n" +
+                    "Bigram with gaps (H2): " + calculateEntropy(bigramProbabilityTableWithGap)/2 +"\n" +
+                    "Bigram without gaps (H2): " + calculateEntropy(bigramProbabilityTableWithoutGaps)/2);
             // dividing by 2 to get H2
+
 
         } catch (FileNotFoundException e) {
             System.err.println("file not found");
@@ -73,6 +61,8 @@ public class Main {
     private static HashMap<String, Double> makeProbabilityTable(HashMap<String, Integer> frequencyTable) {
         HashMap<String, Double> probabilityTable = new HashMap<>();
         double sum = 0;
+        frequencyTable.remove("  ");
+
         for (String key : frequencyTable.keySet()) {
             sum += frequencyTable.get(key);
         }
@@ -92,7 +82,7 @@ public class Main {
         }
         FileInputStream fstream = new FileInputStream(filePath);
         DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         String fileLine;
         while ((fileLine = br.readLine()) != null) {
             for (int i = 0; i < fileLine.length(); i++) {
@@ -115,7 +105,7 @@ public class Main {
         }
         FileInputStream fstream = new FileInputStream(filePath);
         DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         String fileLine;
         while ((fileLine = br.readLine()) != null) {
             for (char letter : fileLine.toCharArray()) {
@@ -131,7 +121,7 @@ public class Main {
     public static void filterText() throws IOException {
         FileInputStream fstream = new FileInputStream(inputFile.getCanonicalPath());
         DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         BufferedWriter withGaps = new BufferedWriter(new FileWriter(fileWithGaps.getCanonicalPath()));
         BufferedWriter withoutGaps = new BufferedWriter(new FileWriter(fileWithoutGaps.getCanonicalPath()));
