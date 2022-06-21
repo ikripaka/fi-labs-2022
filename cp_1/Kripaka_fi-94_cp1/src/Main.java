@@ -17,8 +17,10 @@ public class Main {
             HashMap<String, Integer> frequencyTableWithGap = makeFrequencyDiagram(fileWithGaps.getCanonicalPath(), alphabetWithGap);
             HashMap<String, Integer> frequencyTableWithoutGap = makeFrequencyDiagram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap);
 
-            HashMap<String, Integer> bigramWithGap = makeBigram(fileWithGaps.getCanonicalPath(), alphabetWithGap);
-            HashMap<String, Integer> bigramWithoutGaps = makeBigram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap);
+            HashMap<String, Integer> bigramWithGap = makeBigram(fileWithGaps.getCanonicalPath(), alphabetWithGap, 1);
+            HashMap<String, Integer> bigramWithoutGaps = makeBigram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap, 1);
+            HashMap<String, Integer> bigramWithGapWithoutIntersection = makeBigram(fileWithGaps.getCanonicalPath(), alphabetWithGap, 2);
+            HashMap<String, Integer> bigramWithoutGapsWithoutIntersection = makeBigram(fileWithoutGaps.getCanonicalPath(), alphabetWithoutGap, 2);
 
 
 //            System.out.println(frequencyTableWithGap + "\n" + frequencyTableWithoutGap + "\n" + bigramWithGap + "\n" +
@@ -30,13 +32,18 @@ public class Main {
             HashMap<String, Double> bigramProbabilityTableWithGap = makeProbabilityTable(bigramWithGap);
             HashMap<String, Double> bigramProbabilityTableWithoutGaps = makeProbabilityTable(bigramWithoutGaps);
 
+            HashMap<String, Double> bigramProbabilityTableWithGapWithoutIntersection = makeProbabilityTable(bigramWithGapWithoutIntersection);
+            HashMap<String, Double> bigramProbabilityTableWithoutGapsWithoutintersection = makeProbabilityTable(bigramWithoutGapsWithoutIntersection);
+
 //            System.out.println(probabilityTableWithGap + "\n" + probabilityTableWithoutGap + "\n" +
 //                    bigramProbabilityTableWithGap + "\n" + bigramProbabilityTableWithoutGaps);
 
             System.out.println("Entropy for:" + "\n" + "One symbol with gap (H1): " + calculateEntropy(probabilityTableWithGap) + "\n" +
-            "One symbol without gaps (H1): " + calculateEntropy(probabilityTableWithoutGap) + "\n" +
-                    "Bigram with gaps (H2): " + calculateEntropy(bigramProbabilityTableWithGap)/2 +"\n" +
-                    "Bigram without gaps (H2): " + calculateEntropy(bigramProbabilityTableWithoutGaps)/2);
+                    "One symbol without gaps (H1): " + calculateEntropy(probabilityTableWithoutGap) + "\n" +
+                    "Bigram with gaps/with intersection (H2): " + calculateEntropy(bigramProbabilityTableWithGap) / 2 + "\n" +
+                    "Bigram without gaps/with intersection (H2): " + calculateEntropy(bigramProbabilityTableWithoutGaps) / 2 + "\n" +
+                    "Bigram with gaps/without intersection (H2): " + calculateEntropy(bigramProbabilityTableWithGapWithoutIntersection) / 2 + "\n" +
+                    "Bigram without gaps/without intersection (H2): " + calculateEntropy(bigramProbabilityTableWithoutGapsWithoutintersection) / 2);
             // dividing by 2 to get H2
 
 
@@ -47,13 +54,14 @@ public class Main {
             e.printStackTrace();
         }
     }
+
     //divide by 2 to get H2!!
     private static double calculateEntropy(HashMap<String, Double> probabilityTable) {
         double entropy = 0;
-        for(String key: probabilityTable.keySet()){
+        for (String key : probabilityTable.keySet()) {
             double probability = probabilityTable.get(key);
-            if(probability != 0.0)
-            entropy -= probability *(Math.log(probability)/Math.log(2));
+            if (probability != 0.0)
+                entropy -= probability * (Math.log(probability) / Math.log(2));
         }
         return entropy;
     }
@@ -73,7 +81,7 @@ public class Main {
         return probabilityTable;
     }
 
-    private static HashMap<String, Integer> makeBigram(String filePath, char[] alphabet) throws IOException {
+    private static HashMap<String, Integer> makeBigram(String filePath, char[] alphabet, int offset) throws IOException {
         HashMap<String, Integer> bigram = new HashMap<>();
         for (char letter1 : alphabet) {
             for (char letter2 : alphabet) {
@@ -85,14 +93,13 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         String fileLine;
         while ((fileLine = br.readLine()) != null) {
-            for (int i = 0; i < fileLine.length(); i++) {
-                if (i + 1 < fileLine.length()) {
-                    String newKey = fileLine.charAt(i) + "" + fileLine.charAt(i + 1);
-                    if (bigram.containsKey(newKey)) {
-                        int value = bigram.get(newKey);
-                        bigram.put(newKey, value + 1);
-                    }
+            for (int i = 0; i < fileLine.length() - 1; i += offset) {
+                String newKey = fileLine.charAt(i) + "" + fileLine.charAt(i + 1);
+                if (bigram.containsKey(newKey)) {
+                    int value = bigram.get(newKey);
+                    bigram.put(newKey, value + 1);
                 }
+
             }
         }
         return bigram;
